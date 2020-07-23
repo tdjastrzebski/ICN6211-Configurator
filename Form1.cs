@@ -17,6 +17,48 @@ namespace ICN6211_Configurator
         {
             Application.ThreadException += Application_ThreadException;
             InitializeComponent();
+
+            var testModeItems = new[] {
+                new { Text = "0 - disabled",        Value = (byte)0 },
+                new { Text = "1 - monochrome",      Value = (byte)1 },
+                new { Text = "2 - border",          Value = (byte)2 },
+                new { Text = "3 - cheese board",    Value = (byte)3 },
+                new { Text = "4 - color bar",       Value = (byte)4 },
+                new { Text = "5 - color switching", Value = (byte)5 }
+            };
+            this.TestModeComboBox.DataSource = testModeItems;
+
+            var orderItems = new[] {
+                new { Text = "RGB: Red(0) - Green(1) - Blue(2)", Value = (byte)0b_0000 },
+                new { Text = "RBG: Red(0) - Blue(1) - Green(2)", Value = (byte)0b_0001 },
+                new { Text = "GRB: Green(0) - Red(1) - Blue(2)", Value = (byte)0b_0010 },
+                new { Text = "GBR: Green(0) - Blue(1) - Red(2)", Value = (byte)0b_0011 },
+                new { Text = "BRG: Blue(0) - Red(1) - Green(2)", Value = (byte)0b_0100 },
+                new { Text = "BGR: Blue(0) - Green(1) - Red(2)", Value = (byte)0b_0101 },
+             };
+            this.OrderComboBox.DataSource = orderItems;
+
+            var groupItems888 = new[] {
+                new { Text = "GroupX[7:0] = Color[7:0]", Value = (byte)0b_0100 },
+                new { Text = "GroupX[7:0] = Color[0:7]", Value = (byte)0b_0101 },
+            };
+            Rgb888ComboBox.DataSource = groupItems888;
+
+            var groupItems666 = new[] {
+                new { Text = "GroupX[5:0] = Color[5:0]", Value = (byte)0b_0000 },
+                new { Text = "GroupX[5:0] = Color[0:5]", Value = (byte)0b_0001 },
+                new { Text = "GroupX[7:2] = Color[5:0]", Value = (byte)0b_0010 },
+                new { Text = "GroupX[7:2] = Color[0:5]", Value = (byte)0b_0011 },
+            };
+            Rgb666ComboBox.DataSource = groupItems666;
+
+            var phaseAdjustItems = new[] {
+                new { Text =   "0", Value = (byte)0b_1000_1000 },
+                new { Text = "1/4", Value = (byte)0b_1001_1000 },
+                new { Text = "1/2", Value = (byte)0b_1010_1000 },
+                new { Text = "3/4", Value = (byte)0b_1011_1000 },
+            };
+            this.RgbClkPhaseAdjustComboBox.DataSource = phaseAdjustItems;
         }
 
         private void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
@@ -45,7 +87,7 @@ namespace ICN6211_Configurator
 
         private void TestModeCheckBox_CheckedChanged(object sender, EventArgs e)
         {
-            TestModeTextBox.Enabled = TestModeCheckBox.Checked;
+            TestModeComboBox.Enabled = TestModeCheckBox.Checked;
         }
 
         private void EnableSwapRadioButton_CheckedChanged(object sender, EventArgs e)
@@ -83,7 +125,7 @@ namespace ICN6211_Configurator
         {
             List<(byte register, byte value)> settings = new List<(byte register, byte value)>();
 
-            if (!I2CRadioButton.Checked) settings.Add((0x7A, 0xC1)); // MIPI Command Mode
+            if (MipiCommandModeRadioButton.Checked) settings.Add((0x7A, 0xC1)); // MIPI Command Mode (defalut mode is I2C)
 
             // HACTIVE[7:0]
             ushort hActivePixel = UInt16.Parse(HActivePixelTextBox.Text);
@@ -134,8 +176,9 @@ namespace ICN6211_Configurator
                 settings.Add((0x36, 0xFF));
             }
 
-            int mipiLaneNo = Byte.Parse(MipiLaneNoComboBox.Text) - 1;
-            byte x86 = (byte)(0b_0010_1000 | (mipiLaneNo & 0x03));
+            byte mipiLaneNo = Byte.Parse(MipiLaneNoComboBox.Text);
+            if (mipiLaneNo < 1 | mipiLaneNo > 4) throw new ApplicationException("MIPI Lane No must be between 1 and 4.");
+            byte x86 = (byte)(0b_0010_1000 | (--mipiLaneNo & 0x03));    
             if (x86 != 0x2B) settings.Add((0x86, x86)); // DSI_CTRL register (number of D-PHY lines)
 
             settings.Add((0xB5, 0xA0)); // MIPI_PD_CK_LANE register
@@ -155,14 +198,14 @@ namespace ICN6211_Configurator
             if (x87 != 0) settings.Add((0x87, (byte)x87)); // MIPI P/N Swap
 
             int x2A = 0;
-            x2A |= TEPolarityCheckBox.Checked ? 1 : 0;
+            x2A |= DEPolarityCheckBox.Checked ? 1 : 0;
             x2A |= VSyncPolarityCheckBox.Checked ? 2 : 0;
             x2A |= HSyncPolarityCheckBox.Checked ? 4 : 0;
             x2A |= TestModeCheckBox.Checked ? 8 : 0;
 
             if (TestModeCheckBox.Checked) {
-                byte testMode = Byte.Parse(TestModeTextBox.Text);
-                if (testMode > 15) throw new ApplicationException("Test mode > 15");
+                byte testMode = (byte)TestModeComboBox.SelectedValue;
+                if (testMode > 5) throw new ApplicationException("Test mode > 5");
                 x2A |= 8;
                 x2A |= testMode << 4;
                 settings.Add((0x14, 0x43)); // enable test mode
@@ -183,13 +226,13 @@ namespace ICN6211_Configurator
                 x69 = rgbClk / refClk; // rgbClk as multiplicity of refClk
 
                 if (rgbClk >= 87.5) {
-                    x6B = 0x31;
+                    x6B = 0b_0011_0001;
                     x69 *= 8.0;
                 } else if (rgbClk >= 43.75) {
-                    x6B = 0x51;
+                    x6B = 0b_0101_0001;
                     x69 *= 16.0;
                 } else {
-                    x6B = 0x71;
+                    x6B = 0b_0111_0001;
                     x69 *= 32.0;
                 }
             } else {
@@ -207,16 +250,16 @@ namespace ICN6211_Configurator
                 }
 
                 if (mipiClk >= 320.0) {
-                    x6B |= 0b_10011;
+                    x6B |= 0b_1_0011;
                     x69 *= 24.0;
                 } else if (mipiClk >= 160.0) {
                     x6B |= 0b_10010;
                     x69 *= 16.0;
                 } else if (mipiClk >= 80.0) {
-                    x6B |= 0b_10001;
+                    x6B |= 0b_1_0001;
                     x69 *= 8.0;
                 } else {
-                    x6B |= 0b_00001;
+                    x6B |= 0b_0_0001;
                     x69 *= 4.0;
                 }
             }
@@ -226,55 +269,24 @@ namespace ICN6211_Configurator
             settings.Add((0x69, (byte)x69)); // PLL_INT[7:0] (RGB clock)
 
             byte x10 = (byte)(RfcFunctionCheckBox.Checked ? 0b_1000_0000 : 0);
-            string rgb888Text = Rgb888ComboBox.Text;
-            string rgb666Text = Rgb666ComboBox.Text;
 
             if (Rgb888RadioButton.Checked) {
-                switch (rgb888Text) {
-                    case "GroupX[7:0] = Color[7:0]": x10 |= 0b_0100_0000; break;
-                    case "GroupX[7:0] = Color[0:7]": x10 |= 0b_0101_0000; break;
-                    default: throw new ApplicationException("Unexpected RGB 888 params.");
-                }
+                x10 |= (byte)((byte)Rgb888ComboBox.SelectedValue << 4);
             } else if (Rgb666RadioButton.Checked) {
-                switch (rgb666Text) {
-                    case "GroupX[5:0] = Color[5:0]": x10 |= 0b_0000_0000; break;
-                    case "GroupX[5:0] = Color[0:5]": x10 |= 0b_0001_0000; break;
-                    case "GroupX[7:2] = Color[5:0]": x10 |= 0b_0010_0000; break;
-                    case "GroupX[7:2] = Color[0:5]": x10 |= 0b_0011_0000; break;
-                    default: throw new ApplicationException("Unexpected RGB 666 params");
-                }
+                x10 |= (byte)((byte)Rgb666ComboBox.SelectedValue << 4);
             } else {
                 throw new ApplicationException("Unclear RGB 666/888 mode selection.");
             }
 
-            switch (this.OrderComboBox.Text) {
-                case "RGB: Red(0) - Green(1) - Blue(2)": x10 |= 0b_0000_0000; break;
-                case "RBG: Red(0) - Blue(1) - Green(2)": x10 |= 0b_0000_0001; break;
-                case "GRB: Green(0) - Red(1) - Blue(2)": x10 |= 0b_0000_0010; break;
-                case "GBR: Green(0) - Blue(1) - Red(2)": x10 |= 0b_0000_0011; break;
-                case "BRG: Blue(0) - Red(1) - Green(2)": x10 |= 0b_0000_0100; break;
-                case "BGR: Blue(0) - Green(1) - Red(2)": x10 |= 0b_0000_0101; break;
-                default: throw new ApplicationException("Unexpected RGB Output order.");
-            }
+            x10 |= (byte)OrderComboBox.SelectedValue;
+            settings.Add((0x10, x10)); // SYS_CTRL_0 register (RGB color mode, line swap & order)
 
-            settings.Add((0x10, (byte)x10)); // SYS_CTRL_0 register (RGB color mode, line swap & order)
-
-            string rgbClkPhaseAdjust = RgbClkPhaseAdjustComboBox.Text;
-            byte x11;
-
-            switch (rgbClkPhaseAdjust) {
-                case "0": x11 = 0b_1000_1000; break;
-                case "1/4": x11 = 0b_1001_1000; break;
-                case "1/2": x11 = 0b_1010_1000; break;
-                case "3/4": x11 = 0b_1011_1000; break;
-                default: throw new ApplicationException("Unexpected phase adjust value.");
-            }
-
+            byte x11 = (byte)RgbClkPhaseAdjustComboBox.SelectedValue;
             settings.Add((0x11, x11)); // SYS_CTRL_1 register (phase adjust)
             settings.Add((0xB6, 0x20)); // MIPI_FORCE_0 register
             settings.Add((0x51, 0x20)); // PLL_CTRL_1 register
             settings.Add((0x09, 0x10)); // CONFIG_FINISH register, disply on
-            //settings.Add((0x7A, 0x3E)); // MIPI Command Mode - set to 0x3E at the end (why?)
+                                        //settings.Add((0x7A, 0x3E)); // MIPI Command Mode - set to 0x3E at the end (why?)
 
             string outputText = String.Join("\r\n", settings.Select(rv => $"0x{rv.register:X2} = 0x{rv.value:X2}"));
             return outputText;
@@ -364,7 +376,7 @@ namespace ICN6211_Configurator
 
             // MIPI Lane No
             if (settings.ContainsKey(0x86)) {
-                int mipiLaneNo = settings[0x86] & 0b_0000_0011;
+                byte mipiLaneNo = (byte)(settings[0x86] & 0b_0000_0011);
                 mipiLaneNo += 1;
                 this.MipiLaneNoComboBox.Text = mipiLaneNo.ToString();
             } else {
@@ -481,63 +493,46 @@ namespace ICN6211_Configurator
                 byte config = settings[0x10];
                 RfcFunctionCheckBox.Checked = (config & 0b_1000_0000) == 0b_1000_0000;
 
-                int rgb = (config & 0b_0111_0000) >> 4;
+                byte rgb = (byte)((config & 0b_0111_0000) >> 4);
                 Rgb888RadioButton.Checked = (rgb == 0b_100 || rgb == 0b_101);
                 Rgb666RadioButton.Checked = (rgb == 0b_000 || rgb == 0b_001 || rgb == 0b_010 || rgb == 0b_011);
-                Rgb666ComboBox.Text = "";
-                Rgb888ComboBox.Text = "";
 
-                switch (rgb) {
-                    case 0b_100: Rgb888ComboBox.Text = "GroupX[7:0] = Color[7:0]"; break;
-                    case 0b_101: Rgb888ComboBox.Text = "GroupX[7:0] = Color[0:7]"; break;
-                    case 0b_000: Rgb666ComboBox.Text = "GroupX[5:0] = Color[5:0]"; break;
-                    case 0b_001: Rgb666ComboBox.Text = "GroupX[5:0] = Color[0:5]"; break;
-                    case 0b_010: Rgb666ComboBox.Text = "GroupX[7:2] = Color[5:0]"; break;
-                    case 0b_011: Rgb666ComboBox.Text = "GroupX[7:2] = Color[0:5]"; break;
-                    default: throw new ApplicationException($"Unsupported RGB lines configuration value 0x10=0x{config:X2}.");
+                if (Rgb888RadioButton.Checked) {
+                    Rgb888ComboBox.SelectedValue = rgb;
+                    Rgb666ComboBox.SelectedIndex = 0;
+                } else if (Rgb666RadioButton.Checked) {
+                    Rgb888ComboBox.SelectedIndex = 0;
+                    Rgb666ComboBox.SelectedValue = rgb;
+                } else {
+                    Rgb888ComboBox.SelectedIndex = 0;
+                    Rgb666ComboBox.SelectedIndex = 0;
                 }
 
-                int group = config & 0b_0000_1111;
-                
-                switch (group) {
-                    case 0b_0000: OrderComboBox.Text = "RGB: Red(0) - Green(1) - Blue(2)";  break;
-                    case 0b_0001: OrderComboBox.Text = "RBG: Red(0) - Blue(1) - Green(2)"; break;
-                    case 0b_0010: OrderComboBox.Text = "GRB: Green(0) - Red(1) - Blue(2)"; break;
-                    case 0b_0011: OrderComboBox.Text = "GBR: Green(0) - Blue(1) - Red(2)"; break;
-                    case 0b_0100: OrderComboBox.Text = "BRG: Blue(0) - Red(1) - Green(2)"; break;
-                    case 0b_0101: OrderComboBox.Text = "BGR: Blue(0) - Green(1) - Red(2)"; break;
-                    default: throw new ApplicationException($"Unsupported RGB line order (0x10=0x{config:X2}).");
-                }
+                byte order = (byte)(config & 0b_0000_1111);
+                OrderComboBox.SelectedValue = order;
             } else {
                 RfcFunctionCheckBox.Checked = false;
-                Rgb666ComboBox.Text = "";
-                Rgb888ComboBox.Text = "";
-                OrderComboBox.Text = "";
+                Rgb666ComboBox.SelectedItem = null;
+                Rgb888ComboBox.SelectedItem = null;
+                OrderComboBox.SelectedItem = null;
             }
 
             // Phase adjust
             if (settings.ContainsKey(0x11)) {
                 byte phaseAdjust = settings[0x11];
-
-                switch (phaseAdjust) {
-                    case 0b_1000_1000: RgbClkPhaseAdjustComboBox.Text = "0"; break;
-                    case 0b_1001_1000: RgbClkPhaseAdjustComboBox.Text = "1/4"; break;
-                    case 0b_1010_1000: RgbClkPhaseAdjustComboBox.Text = "1/2"; break;
-                    case 0b_1011_1000: RgbClkPhaseAdjustComboBox.Text = "3/4"; break;
-                    default: throw new ApplicationException($"Unsupported phase adjust value (0x11=0x{phaseAdjust:X2}).");
-                }
+                RgbClkPhaseAdjustComboBox.SelectedValue = phaseAdjust;
             } else {
-                RgbClkPhaseAdjustComboBox.Text = "";
+                RgbClkPhaseAdjustComboBox.SelectedItem = null;
             }
 
             // Polarity
             if (settings.ContainsKey(0x2A)) {
                 byte polarity = settings[0x2A];
-                TEPolarityCheckBox.Checked = (polarity & 0x01) == 0x01;
+                DEPolarityCheckBox.Checked = (polarity & 0x01) == 0x01;
                 VSyncPolarityCheckBox.Checked = (polarity & 0x02) == 0x02;
                 HSyncPolarityCheckBox.Checked = (polarity & 0x04) == 0x04;
             } else {
-                TEPolarityCheckBox.Checked = true;
+                DEPolarityCheckBox.Checked = true;
                 VSyncPolarityCheckBox.Checked = false;
                 HSyncPolarityCheckBox.Checked = false;
             }
@@ -546,7 +541,7 @@ namespace ICN6211_Configurator
             if (settings.ContainsKey(0x14) && settings[0x14] == 0x43 && settings.ContainsKey(0x2A) && (settings[0x2A] & 0x8) == 0x8) {
                 TestModeCheckBox.Checked = true;
                 byte testMode = (byte)(settings[0x2A] >> 4);
-                TestModeTextBox.Text = testMode.ToString();
+                TestModeComboBox.SelectedValue = testMode;
             } else {
                 TestModeCheckBox.Checked = false;
             }
@@ -554,12 +549,11 @@ namespace ICN6211_Configurator
             // I2C
             if (settings.ContainsKey(0x7A)) {
                 byte i2c = settings[0x7A];
-                MipiCommandModeRadioButton.Checked = (i2c == 0xC1);
-                I2CRadioButton.Checked = !MipiCommandModeRadioButton.Checked;
+                MipiCommandModeRadioButton.Checked = (i2c == 0xC1); // default valuie is 0x3E (I2C command mode)
             } else {
                 MipiCommandModeRadioButton.Checked = false;
-                I2CRadioButton.Checked = !MipiCommandModeRadioButton.Checked;
             }
+            I2CRadioButton.Checked = !MipiCommandModeRadioButton.Checked;
         }
     }
 }

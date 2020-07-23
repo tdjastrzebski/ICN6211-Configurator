@@ -52,7 +52,7 @@ namespace ICN6211_Configurator
             this.Group2NoteLabel = new System.Windows.Forms.Label();
             this.Group1NoteLabel = new System.Windows.Forms.Label();
             this.BasicSettingsGroupBox = new System.Windows.Forms.GroupBox();
-            this.TEPolarityCheckBox = new System.Windows.Forms.CheckBox();
+            this.DEPolarityCheckBox = new System.Windows.Forms.CheckBox();
             this.VSyncPolarityCheckBox = new System.Windows.Forms.CheckBox();
             this.HSyncPolarityCheckBox = new System.Windows.Forms.CheckBox();
             this.RefClkTextBox = new System.Windows.Forms.TextBox();
@@ -85,11 +85,11 @@ namespace ICN6211_Configurator
             this.MipiCommandModeRadioButton = new System.Windows.Forms.RadioButton();
             this.I2CRadioButton = new System.Windows.Forms.RadioButton();
             this.TestModeCheckBox = new System.Windows.Forms.CheckBox();
-            this.TestModeTextBox = new System.Windows.Forms.TextBox();
             this.Settings2RegistryButton = new System.Windows.Forms.Button();
             this.Registry2SettingsButton = new System.Windows.Forms.Button();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
             this.FpsToolStripStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.TestModeComboBox = new System.Windows.Forms.ComboBox();
             this.MipiPNSwapGroupBox.SuspendLayout();
             this.RgbOutputGroupBox.SuspendLayout();
             this.BasicSettingsGroupBox.SuspendLayout();
@@ -250,18 +250,14 @@ namespace ICN6211_Configurator
             // 
             // Rgb666ComboBox
             // 
+            this.Rgb666ComboBox.DisplayMember = "Text";
             this.Rgb666ComboBox.FormattingEnabled = true;
-            this.Rgb666ComboBox.Items.AddRange(new object[] {
-            "GroupX[5:0] = Color[5:0]",
-            "GroupX[5:0] = Color[0:5]",
-            "GroupX[7:2] = Color[5:0]",
-            "GroupX[7:2] = Color[0:5]"});
             this.Rgb666ComboBox.Location = new System.Drawing.Point(144, 127);
             this.Rgb666ComboBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.Rgb666ComboBox.Name = "Rgb666ComboBox";
             this.Rgb666ComboBox.Size = new System.Drawing.Size(307, 30);
             this.Rgb666ComboBox.TabIndex = 310;
-            this.Rgb666ComboBox.Text = "GroupX[5:0] = Color[5:0]";
+            this.Rgb666ComboBox.ValueMember = "Value";
             // 
             // Rgb888RadioButton
             // 
@@ -278,33 +274,25 @@ namespace ICN6211_Configurator
             // 
             // Rgb888ComboBox
             // 
+            this.Rgb888ComboBox.DisplayMember = "Text";
             this.Rgb888ComboBox.FormattingEnabled = true;
-            this.Rgb888ComboBox.Items.AddRange(new object[] {
-            "GroupX[7:0] = Color[7:0]",
-            "GroupX[7:0] = Color[0:7]"});
             this.Rgb888ComboBox.Location = new System.Drawing.Point(144, 79);
             this.Rgb888ComboBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.Rgb888ComboBox.Name = "Rgb888ComboBox";
             this.Rgb888ComboBox.Size = new System.Drawing.Size(307, 30);
             this.Rgb888ComboBox.TabIndex = 308;
-            this.Rgb888ComboBox.Text = "GroupX[7:0] = Color[7:0]";
+            this.Rgb888ComboBox.ValueMember = "Value";
             // 
             // OrderComboBox
             // 
+            this.OrderComboBox.DisplayMember = "Text";
             this.OrderComboBox.FormattingEnabled = true;
-            this.OrderComboBox.Items.AddRange(new object[] {
-            "RGB: Red(0) - Green(1) - Blue(2)",
-            "RBG: Red(0) - Blue(1) - Green(2)",
-            "GRB: Green(0) - Red(1) - Blue(2)",
-            "GBR: Green(0) - Blue(1) - Red(2)",
-            "BRG: Blue(0) - Red(1) -  Green(2)",
-            "BGR: Blue(0) - Green(1) -  Red(2)"});
             this.OrderComboBox.Location = new System.Drawing.Point(144, 33);
             this.OrderComboBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.OrderComboBox.Name = "OrderComboBox";
             this.OrderComboBox.Size = new System.Drawing.Size(307, 30);
             this.OrderComboBox.TabIndex = 302;
-            this.OrderComboBox.Text = "RGB: Red(0) - Green(1) - Blue(2)";
+            this.OrderComboBox.ValueMember = "Value";
             // 
             // Rgb666RadioButton
             // 
@@ -359,7 +347,7 @@ namespace ICN6211_Configurator
             // 
             // BasicSettingsGroupBox
             // 
-            this.BasicSettingsGroupBox.Controls.Add(this.TEPolarityCheckBox);
+            this.BasicSettingsGroupBox.Controls.Add(this.DEPolarityCheckBox);
             this.BasicSettingsGroupBox.Controls.Add(this.VSyncPolarityCheckBox);
             this.BasicSettingsGroupBox.Controls.Add(this.HSyncPolarityCheckBox);
             this.BasicSettingsGroupBox.Controls.Add(this.RefClkTextBox);
@@ -396,19 +384,19 @@ namespace ICN6211_Configurator
             this.BasicSettingsGroupBox.TabStop = false;
             this.BasicSettingsGroupBox.Text = "Basic Settings";
             // 
-            // TEPolarityCheckBox
+            // DEPolarityCheckBox
             // 
-            this.TEPolarityCheckBox.AutoSize = true;
-            this.TEPolarityCheckBox.Checked = true;
-            this.TEPolarityCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.TEPolarityCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.TEPolarityCheckBox.Location = new System.Drawing.Point(38, 528);
-            this.TEPolarityCheckBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.TEPolarityCheckBox.Name = "TEPolarityCheckBox";
-            this.TEPolarityCheckBox.Size = new System.Drawing.Size(123, 26);
-            this.TEPolarityCheckBox.TabIndex = 121;
-            this.TEPolarityCheckBox.Text = "TE polarity";
-            this.TEPolarityCheckBox.UseVisualStyleBackColor = true;
+            this.DEPolarityCheckBox.AutoSize = true;
+            this.DEPolarityCheckBox.Checked = true;
+            this.DEPolarityCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.DEPolarityCheckBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.DEPolarityCheckBox.Location = new System.Drawing.Point(38, 528);
+            this.DEPolarityCheckBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
+            this.DEPolarityCheckBox.Name = "DEPolarityCheckBox";
+            this.DEPolarityCheckBox.Size = new System.Drawing.Size(124, 26);
+            this.DEPolarityCheckBox.TabIndex = 121;
+            this.DEPolarityCheckBox.Text = "DE polarity";
+            this.DEPolarityCheckBox.UseVisualStyleBackColor = true;
             // 
             // VSyncPolarityCheckBox
             // 
@@ -462,19 +450,15 @@ namespace ICN6211_Configurator
             // 
             // RgbClkPhaseAdjustComboBox
             // 
+            this.RgbClkPhaseAdjustComboBox.DisplayMember = "Text";
             this.RgbClkPhaseAdjustComboBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.RgbClkPhaseAdjustComboBox.FormattingEnabled = true;
-            this.RgbClkPhaseAdjustComboBox.Items.AddRange(new object[] {
-            "0",
-            "1/4",
-            "1/2",
-            "3/4"});
             this.RgbClkPhaseAdjustComboBox.Location = new System.Drawing.Point(289, 477);
             this.RgbClkPhaseAdjustComboBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.RgbClkPhaseAdjustComboBox.Name = "RgbClkPhaseAdjustComboBox";
             this.RgbClkPhaseAdjustComboBox.Size = new System.Drawing.Size(80, 30);
             this.RgbClkPhaseAdjustComboBox.TabIndex = 120;
-            this.RgbClkPhaseAdjustComboBox.Text = "0";
+            this.RgbClkPhaseAdjustComboBox.ValueMember = "Value";
             // 
             // RgbClkPhaseAdjustLabel
             // 
@@ -779,23 +763,11 @@ namespace ICN6211_Configurator
             this.TestModeCheckBox.Location = new System.Drawing.Point(474, 605);
             this.TestModeCheckBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.TestModeCheckBox.Name = "TestModeCheckBox";
-            this.TestModeCheckBox.Size = new System.Drawing.Size(174, 26);
+            this.TestModeCheckBox.Size = new System.Drawing.Size(164, 26);
             this.TestModeCheckBox.TabIndex = 401;
-            this.TestModeCheckBox.Text = "Test mode (0-15)";
+            this.TestModeCheckBox.Text = "Test mode (1-5)";
             this.TestModeCheckBox.UseVisualStyleBackColor = true;
             this.TestModeCheckBox.CheckedChanged += new System.EventHandler(this.TestModeCheckBox_CheckedChanged);
-            // 
-            // TestModeTextBox
-            // 
-            this.TestModeTextBox.Enabled = false;
-            this.TestModeTextBox.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.TestModeTextBox.Location = new System.Drawing.Point(706, 603);
-            this.TestModeTextBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
-            this.TestModeTextBox.MaxLength = 2;
-            this.TestModeTextBox.Name = "TestModeTextBox";
-            this.TestModeTextBox.Size = new System.Drawing.Size(80, 28);
-            this.TestModeTextBox.TabIndex = 402;
-            this.TestModeTextBox.Text = "8";
             // 
             // Settings2RegistryButton
             // 
@@ -840,15 +812,26 @@ namespace ICN6211_Configurator
             this.FpsToolStripStatusLabel.Size = new System.Drawing.Size(34, 22);
             this.FpsToolStripStatusLabel.Text = "fps";
             // 
+            // TestModeComboBox
+            // 
+            this.TestModeComboBox.DisplayMember = "Text";
+            this.TestModeComboBox.Enabled = false;
+            this.TestModeComboBox.FormattingEnabled = true;
+            this.TestModeComboBox.Location = new System.Drawing.Point(670, 603);
+            this.TestModeComboBox.Name = "TestModeComboBox";
+            this.TestModeComboBox.Size = new System.Drawing.Size(237, 30);
+            this.TestModeComboBox.TabIndex = 402;
+            this.TestModeComboBox.ValueMember = "Value";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 22F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1281, 925);
+            this.Controls.Add(this.TestModeComboBox);
             this.Controls.Add(this.statusStrip1);
             this.Controls.Add(this.Registry2SettingsButton);
             this.Controls.Add(this.Settings2RegistryButton);
-            this.Controls.Add(this.TestModeTextBox);
             this.Controls.Add(this.TestModeCheckBox);
             this.Controls.Add(this.MipiCommandModeRadioButton);
             this.Controls.Add(this.I2CRadioButton);
@@ -929,12 +912,12 @@ namespace ICN6211_Configurator
         private CheckBox RfcFunctionCheckBox;
         private RadioButton MipiCommandModeRadioButton;
         private RadioButton I2CRadioButton;
-        private CheckBox TEPolarityCheckBox;
+        private CheckBox DEPolarityCheckBox;
         private CheckBox TestModeCheckBox;
-        private TextBox TestModeTextBox;
         private Button Settings2RegistryButton;
         private Button Registry2SettingsButton;
         private StatusStrip statusStrip1;
         private ToolStripStatusLabel FpsToolStripStatusLabel;
+        private ComboBox TestModeComboBox;
     }
 }
