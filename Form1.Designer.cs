@@ -763,9 +763,9 @@ namespace ICN6211_Configurator
             this.TestModeCheckBox.Location = new System.Drawing.Point(474, 605);
             this.TestModeCheckBox.Margin = new System.Windows.Forms.Padding(4, 6, 4, 6);
             this.TestModeCheckBox.Name = "TestModeCheckBox";
-            this.TestModeCheckBox.Size = new System.Drawing.Size(164, 26);
+            this.TestModeCheckBox.Size = new System.Drawing.Size(121, 26);
             this.TestModeCheckBox.TabIndex = 401;
-            this.TestModeCheckBox.Text = "Test mode (1-5)";
+            this.TestModeCheckBox.Text = "Test mode";
             this.TestModeCheckBox.UseVisualStyleBackColor = true;
             this.TestModeCheckBox.CheckedChanged += new System.EventHandler(this.TestModeCheckBox_CheckedChanged);
             // 
